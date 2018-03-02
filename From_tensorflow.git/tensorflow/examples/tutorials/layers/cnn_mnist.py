@@ -19,7 +19,7 @@ from __future__ import print_function
 
 import numpy as np
 import tensorflow as tf
-
+from datetime import datetime
 tf.logging.set_verbosity(tf.logging.INFO)
 
 
@@ -37,9 +37,9 @@ def cnn_model_fn(features, labels, mode):
   # Output Tensor Shape: [batch_size, 28, 28, 32]
   conv1 = tf.layers.conv2d(
       inputs=input_layer,
-      filters=32,
+      filters=20,
       kernel_size=[5, 5],
-      padding="same",
+      padding="valid",
       activation=tf.nn.relu)
 
   # Pooling Layer #1
@@ -55,9 +55,9 @@ def cnn_model_fn(features, labels, mode):
   # Output Tensor Shape: [batch_size, 14, 14, 64]
   conv2 = tf.layers.conv2d(
       inputs=pool1,
-      filters=64,
+      filters=50,
       kernel_size=[5, 5],
-      padding="same",
+      padding="valid",
       activation=tf.nn.relu)
 
   # Pooling Layer #2
@@ -69,17 +69,17 @@ def cnn_model_fn(features, labels, mode):
   # Flatten tensor into a batch of vectors
   # Input Tensor Shape: [batch_size, 7, 7, 64]
   # Output Tensor Shape: [batch_size, 7 * 7 * 64]
-  pool2_flat = tf.reshape(pool2, [-1, 7 * 7 * 64])
+  pool2_flat = tf.reshape(pool2, [-1, 4 * 4 * 50])
 
   # Dense Layer
   # Densely connected layer with 1024 neurons
   # Input Tensor Shape: [batch_size, 7 * 7 * 64]
   # Output Tensor Shape: [batch_size, 1024]
-  dense = tf.layers.dense(inputs=pool2_flat, units=1024, activation=tf.nn.relu)
+  dense = tf.layers.dense(inputs=pool2_flat, units=500, activation=tf.nn.relu)
 
   # Add dropout operation; 0.6 probability that element will be kept
   dropout = tf.layers.dropout(
-      inputs=dense, rate=0.4, training=mode == tf.estimator.ModeKeys.TRAIN)
+     inputs=dense, rate=0.4, training=mode == tf.estimator.ModeKeys.TRAIN)
 
   # Logits layer
   # Input Tensor Shape: [batch_size, 1024]
@@ -117,15 +117,16 @@ def cnn_model_fn(features, labels, mode):
 
 def main(unused_argv):
   # Load training and eval data
+  print('%s  before load_dateset' %(datetime.now()))
   mnist = tf.contrib.learn.datasets.load_dataset("mnist")
   train_data = mnist.train.images  # Returns np.array
   train_labels = np.asarray(mnist.train.labels, dtype=np.int32)
   eval_data = mnist.test.images  # Returns np.array
   eval_labels = np.asarray(mnist.test.labels, dtype=np.int32)
-
+  print('%s  after load_dateset' %(datetime.now()))
   # Create the Estimator
   mnist_classifier = tf.estimator.Estimator(
-      model_fn=cnn_model_fn, model_dir="/tmp/mnist_convnet_model")
+      model_fn=cnn_model_fn, model_dir="/tmp/mnist_convnet_model2")
 
   # Set up logging for predictions
   # Log the values in the "Softmax" tensor with label "probabilities"
@@ -151,7 +152,10 @@ def main(unused_argv):
       y=eval_labels,
       num_epochs=1,
       shuffle=False)
+
+  print('%s  before evaluate' %(datetime.now()))
   eval_results = mnist_classifier.evaluate(input_fn=eval_input_fn)
+  print('%s  after evaluate' %(datetime.now()))
   print(eval_results)
 
 

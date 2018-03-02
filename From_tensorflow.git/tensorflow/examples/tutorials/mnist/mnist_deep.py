@@ -29,6 +29,7 @@ from __future__ import print_function
 import argparse
 import sys
 import tempfile
+from datetime import datetime
 
 from tensorflow.examples.tutorials.mnist import input_data
 
@@ -156,6 +157,7 @@ def main(_):
 
   with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
+    print('%s train will' %(datetime.now()) )
     for i in range(20000):
       batch = mnist.train.next_batch(50)
       if i % 100 == 0:
@@ -164,8 +166,14 @@ def main(_):
         print('step %d, training accuracy %g' % (i, train_accuracy))
       train_step.run(feed_dict={x: batch[0], y_: batch[1], keep_prob: 0.5})
 
+    print('%s test accuracy will' %(datetime.now()) )
     print('test accuracy %g' % accuracy.eval(feed_dict={
         x: mnist.test.images, y_: mnist.test.labels, keep_prob: 1.0}))
+    print('%s test accuracy end' %(datetime.now()) )
+
+#   testaccuracy = accuracy.eval(feed_dict={
+#        x: mnist.test.images, y_: mnist.test.labels, keep_prob: 1.0})
+#   print('%s test accuracy %g' %(datetime.now(), testaccuracy) )
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()

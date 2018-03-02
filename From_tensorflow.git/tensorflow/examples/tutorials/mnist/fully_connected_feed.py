@@ -17,7 +17,7 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-
+from datetime  import datetime 
 # pylint: disable=missing-docstring
 import argparse
 import os
@@ -216,10 +216,12 @@ def run_training():
 
 
 def main(_):
+  print(datetime.now())
   if tf.gfile.Exists(FLAGS.log_dir):
     tf.gfile.DeleteRecursively(FLAGS.log_dir)
   tf.gfile.MakeDirs(FLAGS.log_dir)
   run_training()
+  print(datetime.now())
 
 
 if __name__ == '__main__':
