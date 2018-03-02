@@ -20,7 +20,7 @@ from __future__ import print_function
 
 import numpy as np
 import tensorflow as tf
-
+from datetime import datetime 
 from nets import inception
 
 slim = tf.contrib.slim
@@ -208,6 +208,7 @@ class InceptionV3Test(tf.test.TestCase):
       _ = inception.inception_v3(inputs, num_classes, depth_multiplier=0.0)
 
   def testHalfSizeImages(self):
+    print('enter testHalfSizeImages(): %s' % datetime.now())
     batch_size = 5
     height, width = 150, 150
     num_classes = 1000
@@ -220,8 +221,10 @@ class InceptionV3Test(tf.test.TestCase):
     pre_pool = end_points['Mixed_7c']
     self.assertListEqual(pre_pool.get_shape().as_list(),
                          [batch_size, 3, 3, 2048])
+    print('leave testHalfSizeImages(): %s' % datetime.now())
 
   def testUnknownImageShape(self):
+    print('enter testUnknownImageShape(): %s' % datetime.now())
     tf.reset_default_graph()
     batch_size = 2
     height, width = 299, 299
@@ -237,6 +240,7 @@ class InceptionV3Test(tf.test.TestCase):
       tf.global_variables_initializer().run()
       pre_pool_out = sess.run(pre_pool, feed_dict=feed_dict)
       self.assertListEqual(list(pre_pool_out.shape), [batch_size, 8, 8, 2048])
+      print('leave testUnknownImageShape(): %s' % datetime.now())
 
   def testGlobalPoolUnknownImageShape(self):
     tf.reset_default_graph()
@@ -274,6 +278,7 @@ class InceptionV3Test(tf.test.TestCase):
       self.assertEquals(output.shape, (batch_size, num_classes))
 
   def testEvaluation(self):
+    print('enter testEvaluation(): %s' % datetime.now())
     batch_size = 2
     height, width = 299, 299
     num_classes = 1000
@@ -287,8 +292,10 @@ class InceptionV3Test(tf.test.TestCase):
       sess.run(tf.global_variables_initializer())
       output = sess.run(predictions)
       self.assertEquals(output.shape, (batch_size,))
+    print('leave testEvaluation(): %s' % datetime.now())
 
   def testTrainEvalWithReuse(self):
+    print('enter testTrainEvalWithReuse(): %s' % datetime.now())
     train_batch_size = 5
     eval_batch_size = 2
     height, width = 150, 150
@@ -305,6 +312,7 @@ class InceptionV3Test(tf.test.TestCase):
       sess.run(tf.global_variables_initializer())
       output = sess.run(predictions)
       self.assertEquals(output.shape, (eval_batch_size,))
+    print('leave testTrainEvalWithReuse(): %s' % datetime.now())
 
   def testLogitsNotSqueezed(self):
     num_classes = 25

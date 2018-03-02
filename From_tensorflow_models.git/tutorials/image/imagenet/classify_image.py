@@ -49,6 +49,7 @@ FLAGS = None
 
 # pylint: disable=line-too-long
 DATA_URL = 'http://download.tensorflow.org/models/image/imagenet/inception-2015-12-05.tgz'
+DATA_URL = 'file:///home/liuxz/work/dlws/9.ml/mytf/models/inception-2015-12-05.tgz'
 # pylint: enable=line-too-long
 
 
@@ -153,9 +154,10 @@ def run_inference_on_image(image):
     #   encoding of the image.
     # Runs the softmax tensor by feeding the image_data as input to the graph.
     softmax_tensor = sess.graph.get_tensor_by_name('softmax:0')
-    predictions = sess.run(softmax_tensor,
+    for x in range(10):
+     predictions = sess.run(softmax_tensor,
                            {'DecodeJpeg/contents:0': image_data})
-    predictions = np.squeeze(predictions)
+     predictions = np.squeeze(predictions)
 
     # Creates node ID --> English string lookup.
     node_lookup = NodeLookup()
