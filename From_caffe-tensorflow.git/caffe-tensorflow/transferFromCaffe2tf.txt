@@ -1,0 +1,20 @@
+1.  AlextNet
+1) download model "bvlc_alexnet.caffemodel"
+https://github.com/BVLC/caffe/tree/b590f1d27eb5cbd9bc7b9157d447706407c68682/models/bvlc_alexnet
+2) download deploy.prototxt
+https://github.com/BVLC/caffe/tree/master/models
+3) download transfer tool
+https://github.com/ethereon/caffe-tensorflow
+4)transfer
+>/home/liuxz/work/dlws/9.ml/caffe/models/bvlc_alexnet
+python convert.py  /home/liuxz/work/dlws/9.ml/caffe/models/bvlc_alexnet/deploy.prototxt --caffemodel /home/liuxz/work/dlws/9.ml/mytf/bvlc_alexnet.caffemodel --code-output-path=AlexNetTensorflow.py --data-output-path=AlexNetTensorflow_data.npy  
+
+python convert.py  bvlc_alexnet-deploy.prototxt --caffemodel bvlc_alexnet.caffemodel --code-output-path=AlexNetTensorflow.py --data-output-path=AlexNetTensorflow_data.npy  
+
+./convert.py ResNet-101-deploy.prototxt --caffemodel ResNet-101-model.caffemodel --code-output-path=ResNetTensorflow.py --data-output-path=ResNetTensorflow_2.npy  
+
+#REFER#
+http://blog.csdn.net/hereiskxm/article/details/66969127
+
+2.  GoogLeNet
+

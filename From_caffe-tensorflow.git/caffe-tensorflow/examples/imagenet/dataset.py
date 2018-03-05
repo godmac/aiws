@@ -3,7 +3,7 @@
 import os.path as osp
 import numpy as np
 import tensorflow as tf
-
+import time
 
 def process_image(img, scale, isotropic, crop, mean):
     '''Crops, scales, and normalizes the given image.
@@ -19,13 +19,13 @@ def process_image(img, scale, isotropic, crop, mean):
         min_length = tf.minimum(img_shape[0], img_shape[1])
         new_shape = tf.to_int32((scale / min_length) * img_shape)
     else:
-        new_shape = tf.pack([scale, scale])
-    img = tf.image.resize_images(img, new_shape[0], new_shape[1])
+        new_shape = tf.stack([scale, scale])  #liuxz
+    img = tf.image.resize_images(img, new_shape) #liuxz NG
     # Center crop
     # Use the slice workaround until crop_to_bounding_box supports deferred tensor shapes
     # See: https://github.com/tensorflow/tensorflow/issues/521
     offset = (new_shape - crop) / 2
-    img = tf.slice(img, begin=tf.pack([offset[0], offset[1], 0]), size=tf.pack([crop, crop, -1]))
+    img = tf.slice(img, begin=tf.stack([offset[0], offset[1], 0]), size=tf.stack([crop, crop, -1]))
     # Mean subtraction
     return tf.to_float(img) - mean
 
@@ -45,6 +45,9 @@ class ImageProducer(object):
         # A boolean flag per image indicating whether its a JPEG or PNG
         self.extension_mask = self.create_extension_mask(self.image_paths)
         # Create the loading and processing operations
+        print('__init__')
+        print(image_paths)
+        print(data_spec)
         self.setup(batch_size=batch_size, num_concurrent=num_concurrent)
 
     def setup(self, batch_size, num_concurrent):
@@ -110,6 +113,23 @@ class ImageProducer(object):
             return (labels, images)
         return (indices, images)
 
+    def getSingleImage(self, session,index=0):
+        '''
+        Get a single batch of images along with their indices. If a set of labels were provided,
+        the corresponding labels are returned instead of the indices.
+        '''
+        print('-----------------------------imageproducer  getSingleImage():%d' % index)
+        print(self.image_paths[index])
+        a = self.create_extension_mask(self.image_paths)
+        print(a)
+        print('---------------------------------------')
+        #(indices, images) = session.run(self.dequeue_op)
+        (indices, images) = self.processMyImg(self.image_paths[index])
+        if self.labels is not None:
+            labels = [self.labels[idx] for idx in indices]
+            return (labels, images)
+        return (indices, images)
+
     def batches(self, session):
         '''Yield a batch until no more images are left.'''
         for _ in xrange(self.num_batches):
@@ -126,7 +146,8 @@ class ImageProducer(object):
         if self.data_spec.expects_bgr:
             # Convert from RGB channel ordering to BGR
             # This matches, for instance, how OpenCV orders the channels.
-            img = tf.reverse(img, [False, False, True])
+            #img = tf.reverse(img, [False, False, True])
+            img = tf.reverse(img, [2])
         return img
 
     def process(self):
@@ -143,6 +164,24 @@ class ImageProducer(object):
         # Return the processed image, along with its index
         return (idx, processed_img)
 
+    def processMyImg(self,image_path,is_jpeg=True):
+        # Dequeue a single image path
+        print('ImageProducer processMyImg()-------------------------------------------------')
+        # Load the image
+        print(image_path)
+        print(is_jpeg)
+        img = self.load_image(image_path, [is_jpeg])
+        print(img)
+        # Process the image
+        processed_img = process_image(img=img,
+                                      scale=self.data_spec.scale_size,
+                                      isotropic=self.data_spec.isotropic,
+                                      crop=self.data_spec.crop_size,
+                                      mean=self.data_spec.mean)
+        # Return the processed image, along with its index
+        print(processed_img)
+        return (0, processed_img)
+    
     @staticmethod
     def create_extension_mask(paths):
 
